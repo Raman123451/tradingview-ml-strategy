@@ -1,5 +1,5 @@
 ML-Inspired Trading Strategy for TradingView
-This repository contains a Pine Script strategy for TradingView that uses a rules-based approach inspired by machine learning principles to generate buy and sell signals. The strategy is designed to be applied to financial charts, such as Gold (XAUUSD), to backtest its historical performance.
+This repository contains a Pine Script strategy for TradingView that uses a rules-based approach inspired by machine learning principles to generate buy and sell signals. The strategy is designed to be applied to financial charts, such as Gold (XAUUSD), to backtest its historical performance
 
 Overview
 The core logic of this strategy is to combine several classic technical indicators (SMA, EMA, RSI, MACD) and treat them as "features." A signal is generated only when a strong confluence of these features points towards a bullish or bearish bias, mimicking how a machine learning model would find patterns in data.
