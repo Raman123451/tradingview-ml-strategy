@@ -1,0 +1,65 @@
+// © [Your Name or Alias Here]
+// This script is for educational and demonstration purposes only.
+// It is not financial advice.
+
+//@version=5
+strategy("ML-Inspired Strategy", shorttitle="MLI Strategy", overlay=true, initial_capital=100, default_qty_type=strategy.percent_of_equity, default_qty_value=100, commission_value=0.04)
+
+// --- BACKTESTING TIME WINDOW ---
+start_year = year(timenow) - 1
+start_month = month(timenow)
+start_day = dayofmonth(timenow)
+time_window = timestamp(start_year, start_month, start_day, 0, 0)
+
+// --- INPUT SETTINGS (Features) ---
+sma_period = input.int(20, title="SMA Period")
+ema_period = input.int(50, title="EMA Period")
+rsi_period = input.int(14, title="RSI Period")
+macd_fast_period = input.int(12, title="MACD Fast Period")
+macd_slow_period = input.int(26, title="MACD Slow Period")
+macd_signal_period = input.int(9, title="MACD Signal Period")
+
+// --- FEATURE CALCULATION ---
+price = close
+sma_val = ta.sma(price, sma_period)
+ema_val = ta.ema(price, ema_period)
+rsi_val = ta.rsi(price, rsi_period)
+[macd_line, signal_line, hist_line] = ta.macd(price, macd_fast_period, macd_slow_period, macd_signal_period)
+
+// Plot indicators for visual confirmation
+plot(sma_val, title="SMA", color=color.new(color.orange, 0))
+plot(ema_val, title="EMA", color=color.new(color.purple, 0))
+
+// --- "MODEL" LOGIC (RULES-BASED) ---
+buy_condition1 = price > ema_val
+buy_condition2 = sma_val > ema_val
+buy_condition3 = rsi_val < 70 and ta.rising(rsi_val, 2)
+buy_condition4 = macd_line > signal_line
+buy_condition5 = hist_line > 0
+
+sell_condition1 = price < ema_val
+sell_condition2 = sma_val < ema_val
+sell_condition3 = rsi_val > 30 and ta.falling(rsi_val, 2)
+sell_condition4 = macd_line < signal_line
+sell_condition5 = hist_line < 0
+
+// --- GENERATE SIGNALS ---
+is_buy_signal = buy_condition1 and buy_condition2 and buy_condition3 and buy_condition4 and buy_condition5
+buy_signal = is_buy_signal and not is_buy_signal[1]
+
+is_sell_signal = sell_condition1 and sell_condition2 and sell_condition3 and sell_condition4 and sell_condition5
+sell_signal = is_sell_signal and not is_sell_signal[1]
+
+// --- STRATEGY EXECUTION LOGIC ---
+if time >= time_window
+    if (buy_signal)
+        strategy.close("Short", comment="Close Short")
+        strategy.entry("Long", strategy.long, comment="Enter Long")
+
+    if (sell_signal)
+        strategy.close("Long", comment="Close Long")
+        strategy.entry("Short", a=strategy.short, comment="Enter Short")
+
+// --- PLOT SIGNALS ON CHART ---
+plotshape(series=buy_signal and time >= time_window, title="Buy Signal", location=location.belowbar, color=color.new(color.green, 0), style=shape.arrowup, size=size.normal)
+plotshape(series=sell_signal and time >= time_window, title="Sell Signal", location=location.abovebar, color=color.new(color.red, 0), style=shape.arrowdown, size=size.normal)
